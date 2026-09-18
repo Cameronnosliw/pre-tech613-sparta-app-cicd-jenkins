@@ -1,5 +1,13 @@
 # Sparta App - CI Pipeline Documentation (Cameron Wilson)
 
+- [Sparta App - CI Pipeline Documentation (Cameron Wilson)](#sparta-app---ci-pipeline-documentation-cameron-wilson)
+  - [CI Pipeline Diagram](#ci-pipeline-diagram)
+  - [Why we set up the CI Pipeline:](#why-we-set-up-the-ci-pipeline)
+  - [CI Pipeline benefits:](#ci-pipeline-benefits)
+  - [How I set up the jobs:](#how-i-set-up-the-jobs)
+  - [Evidence of success:](#evidence-of-success)
+
+
 This project utilises a two job Jenkins CI pipeline to automate the testing of the dev branch (job 1) and merging of dev to the main branch (job 2). 
 
 ## CI Pipeline Diagram
@@ -18,11 +26,27 @@ By utlising the CI pipeline, we guarantee that every bit of code that is pushed 
 
 ## How I set up the jobs:
 * authentication/security:
-  * We utilise an SSH key pair to keep communication between Jenkins and GitHub is secure. We store the public key on GitHub and the private key within Jenkins, providing access to read/ write. This allows Jenkins to perform job 1 and 2.
+  * We utilise an SSH key pair to keep communication between Jenkins and GitHub is secure. We generate the SSH key pair by doing the following commands:
+   1. Change directory to where we want to store the SSH key pair: cd ~/.ssh
+   2. Created the key pair using the terminal command: ssh-keygen -t ed25519 -a 100 -C "jenkins@spapp-scm-ci"
+  * We store the public key on GitHub (within our repo on GitHub, we go to Settings, Deploy Keys, Add Deploy Key and then paste in the public key and allow the option for write access) and the private key within Jenkins (We create this during the conifguration of job 1 within Source Code management where we link our repository).
 * webhook:
   * We provide GitHub with a webhook to 'listen' for a push to the dev branch, which triggers job 1 in Jenkins, when we configure the job to have a GitHub hook trigger.
-* pipeline triggers:
-  * We have the GitHub trigger for job 1 and job 2 has been configured such that job 2 is initiated after a successful build of job 1.
+  * We set up the webhook by visiting our GitHub repo, Settings, Webhooks, click Add Webhook, insert the ip address of the Jenkins server followed by "/github-webhook/" (e.g. http://52.31.15.176:8080/github-webhook/) and then within job 1, we select the build trigger option "GitHub hook trigger for GITScm polling" in order for the job to trigger when a push is made to the dev branch.
+* We have the following configuration for job 1:
+  
+  1. We select a new item, freestyle project and name it appropriately. 
+  2. Discard any builds that are more than 5 previous, we provide the GitHub project url (https and without ".git" on the end) to link the job to the repo. 
+  3. We next select Git as the option for source code management, where we provide the private SSH key and specify that we are working on the dev branch. As previously mentioned, we select the GitHub hook trigger as the build trigger. 
+  4. We select the build environment option "Provide Node & npm bin/ folder to PATH" and specify the Node.js version utilised. 
+  5. From here we add a build step, "Execute shell", which runs our terminal commands to run the tests on the newly pushed dev branch (cd app, npm install, npm test). These commands change the directory to the app, as we need to be inside the app directory to perform the tests. We perform npm install to initialise Node.js and then the command npm test performs the tests.
+* We have the following configuration for job 2:
+  1. We can either create a new freestyle project or copy from job 1 and make changes accordingly. 
+  2. These are the same: discard any builds that are more than 5 previous, we provide the GitHub project url (https and without ".git" on the end) to link the job to the repo. 
+  3. We next select Git as the option for source code management, where we provide the private SSH key and specify that we are working on the main branch, as we are merging the changes to the main branch. Here we change the build trigger from the webhook to the successful build of job 1 (by selecting the option Build after other projects are built, only if build is stable). 
+  4. We select the build environment option "Provide Node & npm bin/ folder to PATH" and specify the Node.js version utilised. We also select Add SSH agent to provide the job with permission to push to main. 
+  5. From here we add a build step, "Execute shell", which runs our terminal commands to merge the updated dev branch with our main branch (git checkout main, git merge origin/dev, git push origin main). These commands switch to the main branch to allow Jenkins to update it, then merge the code from the dev branch into the main branch, and finally push the updated main branch to GitHub.
+  
 * expected result:
   * We expect the jobs to run succesfully - meaning tests pass, triggering job 2 where the code that is pushed to the dev branch is successfully merged to the main branch.
 
@@ -140,5 +164,8 @@ echo Agent pid 3393 killed;
 [ssh-agent] Stopped.
 Finished: SUCCESS
 ```
+* Screenshot of github to show proof of merge:
+  ![GitHub merge proof](GitHub_Merge_Proof.png)
+  
 * Further evidence:
   This README is within the same repo, so when this was pushed to dev it initiated the pipeline, and was successful since this can be seen within the main branch of the repo.
