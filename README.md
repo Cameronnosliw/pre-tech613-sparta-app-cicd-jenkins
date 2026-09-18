@@ -1,6 +1,6 @@
 # Sparta App - CI Pipeline Documentation (Cameron Wilson)
 
-This project utilises a two job Jenkins CI pipeline to automate the testing of the dev branch (job 1) and merging of dev to the main branch (job 2).
+This project utilises a two job Jenkins CI pipeline to automate the testing of the dev branch (job 1) and merging of dev to the main branch (job 2). 
 
 ## CI Pipeline Diagram
 In the diagram below shows the pipeline's stages. The first shows the pipeline process of the initial developer push, the webhook 'listening', where the job is initiated in Jenkins which uses a master node to assign tasks to the agent node. These agent nodes run and if the tests are successful the pipeline automatically proceeds to merge the robust code into the main branch. The blue annotated numbers refer to the process of authentication, triggering and execution.
@@ -9,7 +9,7 @@ In the diagram below shows the pipeline's stages. The first shows the pipeline p
 ![CI Pipeline](CI_Pipeline.png)
 
 ## Why we set up the CI Pipeline:
-By utlising the CI pipeline, we guarantee that every bit of code that is pushed to the dev repo is tested and robust before it reaches the main branch, and it automates this process.
+By utlising the CI pipeline, we guarantee that every bit of code that is pushed to the dev repo is tested and robust before it reaches the main branch, and it automates this process (in addition to the merge itself).
 
 ## CI Pipeline benefits:
 * Ensures broken code is not pushed to the main branch.
