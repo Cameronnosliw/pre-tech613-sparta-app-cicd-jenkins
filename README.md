@@ -29,7 +29,7 @@ By utlising the CI pipeline, we guarantee that every bit of code that is pushed 
   * We utilise an SSH key pair to keep communication between Jenkins and GitHub is secure. We generate the SSH key pair by doing the following commands:
    1. Change directory to where we want to store the SSH key pair: cd ~/.ssh
    2. Created the key pair using the terminal command: ssh-keygen -t ed25519 -a 100 -C "jenkins@spapp-scm-ci"
-  * We store the public key on GitHub (within our repo on GitHub, we go to Settings, Deploy Keys, Add Deploy Key and then paste in the public key and allow the option for write access) and the private key within Jenkins (We create this during the conifguration of job 1 within Source Code management where we link our repository).
+  * We store the public key on GitHub (within our repo on GitHub, we go to Settings, Deploy Keys, Add Deploy Key and then paste in the public key and allow the option for write access) and the private key within Jenkins (We provide this in the conifguration of job 1 within Source Code management).
 * webhook:
   * We provide GitHub with a webhook to 'listen' for a push to the dev branch, which triggers job 1 in Jenkins, when we configure the job to have a GitHub hook trigger.
   * We set up the webhook by visiting our GitHub repo, Settings, Webhooks, click Add Webhook, insert the ip address of the Jenkins server followed by "/github-webhook/" (e.g. http://52.31.15.176:8080/github-webhook/) and then within job 1, we select the build trigger option "GitHub hook trigger for GITScm polling" in order for the job to trigger when a push is made to the dev branch.
@@ -44,7 +44,7 @@ By utlising the CI pipeline, we guarantee that every bit of code that is pushed 
   1. We can either create a new freestyle project or copy from job 1 and make changes accordingly. 
   2. These are the same: discard any builds that are more than 5 previous, we provide the GitHub project url (https and without ".git" on the end) to link the job to the repo. 
   3. We next select Git as the option for source code management, where we provide the private SSH key and specify that we are working on the main branch, as we are merging the changes to the main branch. Here we change the build trigger from the webhook to the successful build of job 1 (by selecting the option Build after other projects are built, only if build is stable). 
-  4. We select the build environment option "Provide Node & npm bin/ folder to PATH" and specify the Node.js version utilised. We also select Add SSH agent to provide the job with permission to push to main. 
+  4. We select Add SSH agent in build environment to provide the job with permission to push to main. 
   5. From here we add a build step, "Execute shell", which runs our terminal commands to merge the updated dev branch with our main branch (git checkout main, git merge origin/dev, git push origin main). These commands switch to the main branch to allow Jenkins to update it, then merge the code from the dev branch into the main branch, and finally push the updated main branch to GitHub.
   
 * expected result:
